@@ -19,32 +19,54 @@ keyWords = [
     'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally',
     'throw', 'with', 'debugger', 'arguments', 'yield'
 ]
-comments = ['//', '/*', '*/']
 
 # Expresiones regulares para los diferentes tipos de tokens
-identifierRegex = r"[a-zA-Z_$][a-zA-Z0-9_$]*"
+identifierRegex = r"\b[a-zA-Z_$][a-zA-Z0-9_$]*\b"
 numberRegex = r"\b\d+(\.\d+)?\b"
 stringRegex = r'"[^"]*"|\'[^\']*\'|`[^`]*`'
 operatorRegex = r"|".join(re.escape(op) for op in operators)
 delimiterRegex = r"|".join(re.escape(delim) for delim in delimiters)
 keywordRegex = r"\b" + r"\b|\b".join(keyWords) + r"\b"
-commentRegex = r"//.*?$|/\*[\s\S]*?\*/"
+commentRegex = r"//.*|/\*[\s\S]*?\*/"
 
-# Regex para capturar todos los tokens
-tokensRegex = (
-    f"({stringRegex})|({numberRegex})|({identifierRegex})|"
-    f"({operatorRegex})|({delimiterRegex})|({keywordRegex})|({commentRegex})"
+# Regex para capturar todos los tokens válidos
+validTokensRegex = (
+    f"({commentRegex})|({stringRegex})|({numberRegex})|({identifierRegex})|"
+    f"({operatorRegex})|({delimiterRegex})|({keywordRegex})"
 )
 
+# Función para analizar léxicamente el código
 def analizarLexico(code):
     # Elimina los espacios en blanco al inicio y al final del código
     code = code.strip()
-    # Encuentra todos los tokens
-    tokens = re.findall(tokensRegex, code, re.MULTILINE | re.DOTALL)
+    # Encuentra todos los tokens válidos
+    validTokens = re.findall(validTokensRegex, code, re.MULTILINE | re.DOTALL)
     # Filtra los grupos vacíos
-    tokens = [t for ts in tokens for t in ts if t]
+    validTokens = [t for ts in validTokens for t in ts if t]
 
-    for c in tokens:
+    # Inicializa una lista para guardar los tokens no válidos
+    invalidTokens = []
+
+    # Índice para seguir la posición en el código
+    index = 0
+
+    while index < len(code):
+        # Encuentra el próximo token válido o el final del código
+        match = re.search(validTokensRegex, code[index:], re.MULTILINE | re.DOTALL)
+        if match:
+            start, end = match.span()
+            # Agrega el texto antes del token válido a los tokens no válidos
+            if start > 0:
+                invalidTokens.append(code[index:index+start])
+            # Actualiza el índice para continuar después del token válido
+            index += end
+        else:
+            # Si no hay más tokens válidos, agrega el resto del código a los tokens no válidos
+            invalidTokens.append(code[index:])
+            break
+
+    # Imprime los tokens válidos
+    for c in validTokens:
         if c in operators:
             print(f'Operador: {c}')
         elif c in literals:
@@ -53,19 +75,25 @@ def analizarLexico(code):
             print(f'Delimitador: {c}')
         elif c in keyWords:
             print(f'Palabra clave: {c}')
-        elif c in comments:
+        elif re.fullmatch(commentRegex, c):
             print(f'Comentario: {c}')
+        elif re.fullmatch(numberRegex, c):
+            print(f'Número: {c}')
         elif re.fullmatch(identifierRegex, c):
             print(f'Identificador: {c}')
         elif re.fullmatch(stringRegex, c):
             print(f'String: {c}')
-        elif re.fullmatch(numberRegex, c):
-            print(f'Número: {c}')
         else:
             print(f'Token no reconocido: {c}')
 
-    return True
+    # Imprime los tokens no válidos
+    for c in invalidTokens:
+        if c.strip():
+            print(f'Token no válido: {c}')
+   
+	# Retorna True si no hay tokens no válidos, False en caso contrario
+    return not invalidTokens
 
-# print('code : ')
-# code = input()
-# print(f'resultado analisis: {analizarLexico(code)}')
+# Ejemplo de uso
+# codigo_js = "123asd // Esto es un 12comentario"
+# print(analizarLexico(codigo_js))
