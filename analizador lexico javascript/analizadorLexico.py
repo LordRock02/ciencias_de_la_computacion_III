@@ -21,41 +21,51 @@ keyWords = [
 ]
 comments = ['//', '/*', '*/']
 
-# Expresion regular para los identificadores
-# Permite letras, digitos, guion bajo, guion medio y signo de dolar
-# No puede empezar con un digito
-identifierRegex = r"^[a-zA-Z_$][a-zA-Z0-9_$-]*$"
+# Expresiones regulares para los diferentes tipos de tokens
+identifierRegex = r"[a-zA-Z_$][a-zA-Z0-9_$]*"
+numberRegex = r"\b\d+(\.\d+)?\b"
+stringRegex = r'"[^"]*"|\'[^\']*\'|`[^`]*`'
+operatorRegex = r"|".join(re.escape(op) for op in operators)
+delimiterRegex = r"|".join(re.escape(delim) for delim in delimiters)
+keywordRegex = r"\b" + r"\b|\b".join(keyWords) + r"\b"
+commentRegex = r"//.*?$|/\*[\s\S]*?\*/"
 
-numberRegex = r'^[0-9]+(\.[0-9]+)?$'
-
-stringRegex = r'"[^"]+"|\'[^\']+\'|`[^`]+`'
-
-tokensRegex = r'"[^"]+"|\'[^\']+\'|`[^`]+`|\S+|"(?=\s)|\'(?=\s)|`(?=\s)'
-
+# Regex para capturar todos los tokens
+tokensRegex = (
+    f"({stringRegex})|({numberRegex})|({identifierRegex})|"
+    f"({operatorRegex})|({delimiterRegex})|({keywordRegex})|({commentRegex})"
+)
 
 def analizarLexico(code):
+    # Elimina los espacios en blanco al inicio y al final del código
+    code = code.strip()
+    # Encuentra todos los tokens
+    tokens = re.findall(tokensRegex, code, re.MULTILINE | re.DOTALL)
+    # Filtra los grupos vacíos
+    tokens = [t for ts in tokens for t in ts if t]
 
-	tokens = re.findall(tokensRegex, code)
-	print(tokens)
+    for c in tokens:
+        if c in operators:
+            print(f'Operador: {c}')
+        elif c in literals:
+            print(f'Literal: {c}')
+        elif c in delimiters:
+            print(f'Delimitador: {c}')
+        elif c in keyWords:
+            print(f'Palabra clave: {c}')
+        elif c in comments:
+            print(f'Comentario: {c}')
+        elif re.fullmatch(identifierRegex, c):
+            print(f'Identificador: {c}')
+        elif re.fullmatch(stringRegex, c):
+            print(f'String: {c}')
+        elif re.fullmatch(numberRegex, c):
+            print(f'Número: {c}')
+        else:
+            print(f'Token no reconocido: {c}')
 
-	for c in tokens:
-		if any(c in lista
-		       for lista in [operators, literals, delimiters, keyWords, comments]):
-			print(f'Token Especial: {c}')
-			continue
-		elif re.search(identifierRegex, c):
-			print(f'Identificador: {c}')
-			continue
-		elif re.search(stringRegex, c):
-			print(f'String: {c}')
-			continue
-		elif re.search(numberRegex, c):
-			print(f'Numero: {c}')
-			continue
-		return False
-	return True
+    return True
 
-
-'''print('code : ')
-code = input()
-print(f'resultado analisis: {analizarSintaxis(code)}')'''
+# print('code : ')
+# code = input()
+# print(f'resultado analisis: {analizarLexico(code)}')
