@@ -17,7 +17,7 @@ keyWords = [
     'break', 'continue', 'return', 'function', 'var', 'let', 'const', 'new',
     'delete', 'in', 'instanceof', 'typeof', 'void', 'this', 'super', 'class',
     'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally',
-    'throw', 'with', 'debugger', 'arguments', 'yield'
+    'throw', 'with', 'debugger', 'arguments', 'yield', "console", "log", "alert"
 ]
 
 # Expresiones regulares para los diferentes tipos de tokens
@@ -65,34 +65,44 @@ def analizarLexico(code):
             invalidTokens.append(code[index:])
             break
 
-    # Imprime los tokens válidos
+    tokens = []
+    # Imprime los tokens válidos y crea un diccionario con la información
     for c in validTokens:
         if c in operators:
+            tokens.append({"tipo": "Operador", "valor": c})
             print(f'Operador: {c}')
         elif c in literals:
+            tokens.append({"tipo": "Literal", "valor": c})
             print(f'Literal: {c}')
         elif c in delimiters:
+            tokens.append({"tipo": "Delimitador", "valor": c})
             print(f'Delimitador: {c}')
         elif c in keyWords:
+            tokens.append({"tipo": "Palabra clave", "valor": c})
             print(f'Palabra clave: {c}')
         elif re.fullmatch(commentRegex, c):
+            tokens.append({"tipo": "Comentario", "valor": c})
             print(f'Comentario: {c}')
         elif re.fullmatch(numberRegex, c):
+            tokens.append({"tipo": "Número", "valor": c})
             print(f'Número: {c}')
         elif re.fullmatch(identifierRegex, c):
+            tokens.append({"tipo": "Identificador", "valor": c})
             print(f'Identificador: {c}')
         elif re.fullmatch(stringRegex, c):
+            tokens.append({"tipo": "String", "valor": c})
             print(f'String: {c}')
-        else:
-            print(f'Token no reconocido: {c}')
 
     # Imprime los tokens no válidos
     for c in invalidTokens:
         if c.strip():
             print(f'Token no válido: {c}')
+            
+    # Si es un espacio en blanco, lo sacamos del arreglo de tokens no válidos
+    invalidTokens = [c for c in invalidTokens if c.strip()]
    
 	# Retorna True si no hay tokens no válidos, False en caso contrario
-    return not invalidTokens
+    return {"isValid": not bool(invalidTokens), "tokensList": tokens}
 
 # Ejemplo de uso
 # codigo_js = "123asd // Esto es un 12comentario"
