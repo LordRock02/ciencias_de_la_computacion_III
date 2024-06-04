@@ -31,29 +31,28 @@ operatorRegex = r"|".join(re.escape(op) for op in operators)
 literalRegex = r"\b" + r"\b|\b".join(literals) + r"\b"
 delimiterRegex = r"|".join(re.escape(delim) for delim in delimiters)
 keywordRegex = r"\b" + r"\b|\b".join(keyWords) + r"\b"
-
-
 commentRegex = r"//.*|/\*[\s\S]*?\*/"
 
 # Regex para capturar todos los tokens válidos
 validTokensRegex = (
-    f"({literalRegex})|({commentRegex})|({stringRegex})|({numberRegex})|({identifierRegex})|"
-    f"({operatorRegex})|({delimiterRegex})|({keywordRegex})"
+    f"({keywordRegex})|({commentRegex})|({stringRegex})|({literalRegex})|"
+    f"({operatorRegex})|({delimiterRegex})|({numberRegex})|({identifierRegex})"
 )
 
 # Función para clasificar tokens
-def clasificar_token(token, esValido):
-    tipo = "NAN" if not esValido else determinar_tipo(token)
-    return {"valor": token, "tipo": tipo, "esValido": esValido}
+def clasificar_token(token):
+    tipo = determinar_tipo(token)
+    return {"valor": token, "tipo": tipo, "esValido": tipo != "NAN"}
 
 tipos_tokens = {
     "cadena": stringRegex,
     "keyWord": keywordRegex,
+    "comentario": commentRegex,
+    "literal": literalRegex,
     "operador": operatorRegex,
     "delimitador": delimiterRegex,
     "numero": numberRegex,
     "identificador": identifierRegex,
-    "literal": literalRegex,
 }
 
 def determinar_tipo(token):
@@ -62,10 +61,93 @@ def determinar_tipo(token):
             return tipo
     return "NAN"
 
+# Definición de los diferentes tipos de operadores
+arithmeticOperators = ['+', '-', '*', '/']
+assignmentOperators = ['=']
+comparisonOperators = ['>=', '<=', '==', '!=', '>', '<']
+logicalOperators = ['&&', '||', '!']
+incrementDecrementOperators = ['++', '--']
+compoundAssignmentOperators = ['+=', '-=', '*=', '/=', '%=', '^=']
+
+# Definición de los diferentes tipos de literales
+booleanLiterals = ['true', 'false']
+stringLiterals = ['""', "''", "``"]
+arrayLiterals = ['[]']
+
+# Definición de los diferentes tipos de delimitadores
+delimitertipos = {
+    '=>': 'ARROW_FUNCTION',
+    '(': 'OPENING_PARENTHESIS',
+    ')': 'CLOSING_PARENTHESIS',
+    '{': 'OPENING_CURLY_BRACE',
+    '}': 'CLOSING_CURLY_BRACE',
+    '[': 'OPENING_SQUARE_BRACKET',
+    ']': 'CLOSING_SQUARE_BRACKET',
+    '"': 'STRING_DELIMITER',
+    "'": 'STRING_DELIMITER',
+    '`': 'STRING_DELIMITER',
+    ',': 'PARAMETER_DELIMITER',
+    ';': 'STATEMENT_TERMINATOR',
+    '.': 'OBJECT_PROPERTY_ACCESSOR',
+    '?': 'TERNARY_OPERATOR',
+    ':': 'COLON'
+}
+
+# Definición de los diferentes tipos de palabras clave
+keywordCategories = {
+    'if': 'IF_KEYWORD',
+    'else': 'ELSE_KEYWORD',
+    'console': 'CONSOLE_KEYWORD',
+    'log': 'LOG_KEYWORD',
+    'alert': 'ALERT_KEYWORD',
+    'let': 'VARIABLE_DECLARATION_KEYWORD',
+    'const': 'VARIABLE_DECLARATION_KEYWORD',
+    'var': 'VARIABLE_DECLARATION_KEYWORD',
+}
+
+# Funcion para clasificar tokens
+def clasificarTokens(tokens):
+    for linea in tokens:
+        for token in linea:
+            if token['tipo'] == 'operador':
+                if token['valor'] in incrementDecrementOperators:
+                    token['tipo'] = 'INCREMENT_DECREMENT_OPERATOR'
+                elif token['valor'] in arithmeticOperators:
+                    token['tipo'] = 'ARITHMETIC_OPERATOR'
+                elif token['valor'] in assignmentOperators:
+                    token['tipo'] = 'ASSIGNMENT_OPERATOR'
+                elif token['valor'] in comparisonOperators:
+                    token['tipo'] = 'COMPARISON_OPERATOR'
+                elif token['valor'] in logicalOperators:
+                    token['tipo'] = 'LOGICAL_OPERATOR'
+                elif token['valor'] in compoundAssignmentOperators:
+                    token['tipo'] = 'COMPOUND_ASSIGNMENT_OPERATOR'
+            if token['tipo'] == 'literal':
+                if token['valor'] in booleanLiterals:
+                    token['tipo'] = 'BOOLEAN_LITERAL'
+                elif token['valor'] in stringLiterals:
+                    token['tipo'] = 'STRING'
+                elif token['valor'] in arrayLiterals:
+                    token['tipo'] = 'ARRAY_LITERAL'
+            if token['tipo'] == 'delimitador' and token['valor'] in delimitertipos:
+                token['tipo'] = delimitertipos[token['valor']]
+            if token['tipo'] == 'keyWord' and token['valor'] in keywordCategories:
+                token['tipo'] = keywordCategories[token['valor']]
+            if token['tipo'] == 'identificador':
+                token['tipo'] = 'IDENTIFIER'
+            if token['tipo'] == 'comentario':
+                token['tipo'] = 'COMMENT'
+            if token['tipo'] == 'cadena':
+                token['tipo'] = 'STRING'
+            if token['tipo'] == 'numero':
+                token['tipo'] = 'NUMBER'
+    return tokens
+
 # Función para analizar léxicamente el código
 def analizarLexico(code):
     # Elimina los espacios en blanco al inicio y al final del código
     code = code.strip()
+    # Divide el código en líneas
     lineas = code.split('\n')
     codigoPorLineas = []
 
@@ -84,23 +166,27 @@ def analizarLexico(code):
                 # Si hay texto antes del token válido, es un token no válido
                 if start > 0:
                     token_no_valido = linea[index:index+start]
-                    tokensObjetos.append(clasificar_token(token_no_valido, False))
+                    tokensObjetos.append(clasificar_token(token_no_valido))
                 # Agrega el token válido
                 token_valido = linea[index+start:index+end]
-                tokensObjetos.append(clasificar_token(token_valido, True))
+                tokensObjetos.append(clasificar_token(token_valido))
                 index += end
             else:
                 # Si no hay más tokens válidos, procesa el resto de la línea como token no válido
                 token_no_valido = linea[index:]
-                tokensObjetos.append(clasificar_token(token_no_valido, False))
+                tokensObjetos.append(clasificar_token(token_no_valido))
                 break
 
         # Agrega la lista de objetos de tokens a la lista de líneas
         codigoPorLineas.append(tokensObjetos)
 
+    # Clasifica los tokens
+    codigoPorLineas = clasificarTokens(codigoPorLineas)
+
     # Retorna la lista de listas de objetos de tokens
     return codigoPorLineas
 
+# Función para generar el reporte léxico
 def generarReporteLexico(codigoAnalizado):
     errores = ""
     tokens = ""
@@ -130,9 +216,9 @@ def generarReporteLexico(codigoAnalizado):
     reporteFinal = "----ERRORES----\n" + errores + "\n----TOKENS----\n" + tokens
     return reporteFinal
     
-# # Ejemplo de uso
+# Ejemplo de uso
 # codigo_js = """
-# let x = '';
+# let 12x = '';
 # if (x > 10) {
 #   console.log('X es mayor o igual a 10');
 # } else if (x < 10){
