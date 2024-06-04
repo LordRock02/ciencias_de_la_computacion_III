@@ -30,18 +30,19 @@ def generarReporteSemantico(codigoAnalizado):
     errores = ""
     tokens = ""
     numeroLinea = 1
+    errors = []
 
     for linea in codigoAnalizado:
         tokens += f'{linea["nombre"]}: {linea["accion"]}\n'
         
         if not linea['isValid']:
             errores += "SEMANTIC_ERROR: There is a semantic error in line " + str(numeroLinea) + " due to variable "+ str(linea['nombre']) +" not being used correctly \n"
-        
+            errors.append("SEMANTIC_ERROR: There is a semantic error in line " + str(numeroLinea) + " due to variable "+ str(linea['nombre']) +" not being used correctly")
         numeroLinea += 1
         
     # Construye el reporte final
     reporteFinal = "----ERRORES SEMANTICOS----\n" + errores + "\n----ACCIONES----\n" + tokens
-    return reporteFinal
+    return errors
 
 # # Función de prueba
 # codigo_js = """

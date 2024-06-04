@@ -251,18 +251,19 @@ def generarReporteSintactico(codigoAnalizado):
     errores = ""
     tokens = ""
     numeroLinea = 1
+    errors = []
 
     for linea in codigoAnalizado:
-        tokens += f'{linea["tokens"]}: {linea['tipo']}\n'
+        tokens += f'{linea["tokens"]}: {linea["tipo"]}\n'
         
         if linea['tipo'] == 'INVALID':
             errores += "SINTAX_ERROR: There is a syntax error in line " + str(numeroLinea) + " due to "+ str(linea['tokens']) +" not being recognized as a valid statement\n"
-        
+            errors.append("SINTAX_ERROR: There is a syntax error in line " + str(numeroLinea) + " due to "+ str(linea['tokens']) +" not being recognized as a valid statement")
         numeroLinea += 1
         
     # Construye el reporte final
     reporteFinal = "----ERRORES SINTACTICOS----\n" + errores + "\n----LINEAS----\n" + tokens
-    return reporteFinal
+    return errors
 
 # codigo_js = """
 # class Persona {

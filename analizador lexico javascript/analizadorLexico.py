@@ -226,7 +226,7 @@ def generarReporteLexico(codigoAnalizado):
 
     # Construye el reporte final
     reporteFinal = "----ERRORES LEXICOS----\n" + errores + "\n----TOKENS----\n" + tokens
-    return reporteFinal
+    return {'errores':erroresLinea, 'tokens':tokensLinea}
     
 # # Ejemplo de uso
 # codigo_js = """

@@ -21,7 +21,9 @@
 			style="display: block; margin: auto;">Analizar</button>
 	</div>
 	<div id="container-btns">
-		<button type="button" id="errorbtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalErrores">errores</button>
+		<button type="button" id="errorbtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalErrores">lexico</button>
+		<button type="button" id="sintaxisbtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSintaxis">sintaxis</button>
+		<button type="button" id="semanticobtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSemantico">semantico</button>
 		<button type="button" id="tokensbtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTokens">tokens</button>
 	</div>
 
@@ -35,6 +37,38 @@
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body-errores" id="modal-errores">
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modalSintaxis" tabindex="-1" aria-labelledby="modalSintaxisLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalSintaxisLabel">SINTAXIS</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body-errores" id="modal-sintaxis">
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="modalSemantico" tabindex="-1" aria-labelledby="modalSemanticoLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalSemanticoLabel">SEMANTICO</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body-errores" id="modal-semantico">
 
 				</div>
 				<div class="modal-footer">

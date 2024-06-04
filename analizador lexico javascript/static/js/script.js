@@ -1,6 +1,8 @@
 const textArea = document.getElementById('code')
 const modalErrores = document.getElementById('modal-errores')
 const modalTokens = document.getElementById('modal-tokens')
+const modalSintaxis = document.getElementById('modal-sintaxis')
+const modalSemantico = document.getElementById('modal-semantico')
 
 
 
@@ -13,12 +15,14 @@ const analizarTexto = () => {
         })
         .then(data => {
             alert(`resultado analisis ${JSON.stringify(data.result)}`)
-            reporte(data.reporte.errores)
-            tokens(data.reporte.tokens)
+            reporteLexico(data.reporteLexico.errores)
+            reporteSintactico(data.reporteSintactico)
+            reporteSemantico(data.reporteSemantico)
+            tokens(data.reporteLexico.tokens)
         })
 }
 
-const reporte = (errores) => {
+const reporteLexico = (errores) => {
     console.log(errores)
     let table = document.createElement('table')
     table.innerHTML = `
@@ -39,6 +43,51 @@ const reporte = (errores) => {
     `
     modalErrores.innerHTML = ''
     modalErrores.appendChild(table)
+}
+const reporteSintactico = (errores) => {
+    console.log(`errrores sintacticos ${errores}`)
+    let table = document.createElement('table')
+    table.innerHTML = `
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>error</th>
+        </tr>
+        <tbody>
+        ${errores.map((error, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${error}</td>
+            </tr>
+        `).join('')}
+        </tbody>
+    </thead>
+    `
+    modalSintaxis.innerHTML = ''
+    modalSintaxis.appendChild(table)
+}
+
+const reporteSemantico = (errores) => {
+    console.log(`errrores semanticos ${errores}`)
+    let table = document.createElement('table')
+    table.innerHTML = `
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>error</th>
+        </tr>
+        <tbody>
+        ${errores.map((error, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${error}</td>
+            </tr>
+        `).join('')}
+        </tbody>
+    </thead>
+    `
+    modalSemantico.innerHTML = ''
+    modalSemantico.appendChild(table)
 }
 
 const tokens = (tokens) => {
