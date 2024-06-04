@@ -13,11 +13,9 @@ delimiters = [
     '(', ')', '{', '}', '[', ']', '"', "'", "`", ',', ';', ':', '.', '?', '=>'
 ]
 keyWords = [
-    'if', 'else', 'let', 'const', 'var', 'console', 'log', 'alert'
-]
+    'if', 'else', 'let', 'const', 'var', 'console', 'log', 'alert', 'switch', 'case', 'default', 'break', 
+    'while', 'do', 'for', 'continue', 'return', 'function', 'new', 'this', 'class', 'constructor']
 otherKeyWords = [
-    'switch', 'case', 'default', 'while', 'do', 'for',
-    'break', 'continue', 'return', 'function', 'new',
     'delete', 'in', 'instanceof', 'typeof', 'void', 'this', 'super', 'class',
     'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally',
     'throw', 'with', 'debugger', 'arguments', 'yield'
@@ -103,6 +101,20 @@ keywordCategories = {
     'let': 'VARIABLE_DECLARATION_KEYWORD',
     'const': 'VARIABLE_DECLARATION_KEYWORD',
     'var': 'VARIABLE_DECLARATION_KEYWORD',
+    'switch': 'SWITCH_KEYWORD',
+    'case': 'CASE_KEYWORD',
+    'default': 'DEFAULT_KEYWORD',
+    'break': 'BREAK_KEYWORD',
+    'while': 'WHILE_KEYWORD',
+    'do': 'DO_KEYWORD',
+    'for': 'FOR_KEYWORD',
+    'continue': 'CONTINUE_KEYWORD',
+    'return': 'RETURN_KEYWORD',
+    'function': 'FUNCTION_KEYWORD',
+    'new': 'NEW_KEYWORD',
+    'this': 'THIS_KEYWORD',
+    'class': 'CLASS_KEYWORD',
+    'constructor': 'CONSTRUCTOR_KEYWORD',
 }
 
 # Funcion para clasificar tokens
@@ -203,7 +215,7 @@ def generarReporteLexico(codigoAnalizado):
 
             # Si el token no es válido, agrega un mensaje de error
             if not tokenObj['esValido']:
-                erroresLinea.append(f"LEXIC_ERROR there is a lexic error in line {numeroLinea} due to the token {tokenObj['valor']}")
+                erroresLinea.append(f"LEXIC_ERROR: there is a lexic error in line {numeroLinea} due to the token {tokenObj['valor']}")
 
         # Agrega los errores y tokens de la línea al reporte general
         if erroresLinea:
@@ -213,11 +225,10 @@ def generarReporteLexico(codigoAnalizado):
         numeroLinea += 1
 
     # Construye el reporte final
-    reporteFinal = "----ERRORES----\n" + errores + "\n----TOKENS----\n" + tokens
-    reporte = {'errores':erroresLinea, 'tokens':tokensLinea}
-    return reporte
-
-# Ejemplo de uso
+    reporteFinal = "----ERRORES LEXICOS----\n" + errores + "\n----TOKENS----\n" + tokens
+    return reporteFinal
+    
+# # Ejemplo de uso
 # codigo_js = """
 # let 12x = '';
 # if (x > 10) {
