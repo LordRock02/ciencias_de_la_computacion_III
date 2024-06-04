@@ -214,8 +214,9 @@ def generarReporteLexico(codigoAnalizado):
 
     # Construye el reporte final
     reporteFinal = "----ERRORES----\n" + errores + "\n----TOKENS----\n" + tokens
-    return reporteFinal
-    
+    reporte = {'errores':erroresLinea, 'tokens':tokensLinea}
+    return reporte
+
 # Ejemplo de uso
 # codigo_js = """
 # let 12x = '';

@@ -1,35 +1,37 @@
 /* Import Google font - Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-*{
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
-body{
+body {
   display: flex;
+  flex-direction: column;
+  gap: 20px;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(#4671EA, #AC34E7);
+  background: linear-gradient(#4671ea, #ac34e7);
 }
-::selection{
+::selection {
   color: #fff;
-  background: #4671EA;
+  background: #4671ea;
 }
-.wrapper{
+.wrapper {
   width: 470px;
   background: #fff;
   border-radius: 5px;
   padding: 25px 25px 30px;
-  box-shadow: 8px 8px 10px rgba(0,0,0,0.06);
+  box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.06);
 }
-.wrapper h2{
-  color: #4671EA;
+.wrapper h2 {
+  color: #4671ea;
   font-size: 28px;
   text-align: center;
 }
-.wrapper textarea{
+.wrapper textarea {
   width: 100%;
   resize: none;
   height: 59px;
@@ -39,16 +41,46 @@ body{
   margin-top: 20px;
   border-radius: 5px;
   max-height: 330px;
-  caret-color: #4671EA;
+  caret-color: #4671ea;
   border: 1px solid #bfbfbf;
 }
-textarea::placeholder{
+textarea::placeholder {
   color: #b3b3b3;
 }
-textarea:is(:focus, :valid){
+textarea:is(:focus, :valid) {
   padding: 14px;
-  border: 2px solid #4671EA;
+  border: 2px solid #4671ea;
 }
-textarea::-webkit-scrollbar{
+textarea::-webkit-scrollbar {
   width: 0px;
+}
+.modal-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+table {
+  margin: 20px auto; /* Centra la tabla horizontalmente y agrega margen vertical */
+  border-collapse: collapse; /* Asegura que los bordes se colapsen en uno solo */
+  width: 80%; /* Opcional: Ancho de la tabla */
+}
+table tr td:nth-child(1),
+table tr th:nth-child(1) {
+  width: 10%;
+}
+th,
+td {
+  padding: 8px;
+}
+#container-btns{
+  display: flex;
+  gap: 50px;
+}
+#errorbtn {
+  background-color: #ea4656;
+  border-color: #ea4656;
+}
+#tokensbtn {
+    background-color: #46ea85;
+  border-color: #46ea85;
 }
