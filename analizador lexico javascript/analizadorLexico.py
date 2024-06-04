@@ -2,22 +2,25 @@ import re
 
 # Listas para los diferentes tipos de tokens en Javascript
 operators = [
-    '+', '-', '*', '=', '/', '%', '++', '--', '==', '!=', '>', '<', '>=', '<=',
-    '&&', '||', '!', '&', '|', '^', '~', '<<', '>>', '>>>', '+=', '-=', '*=',
-    '/=', '%=', '<<=', '>>=', '>>>=', '&=', '|=', '^='
+    '++', '--', '==', '!=', '>=', '<=', '&&', '||', '+=', 
+    '-=', '*=', '/=', '%=', '&=', '|=', '^=', '!',
+    '^', '+', '-', '*', '=', '/', '%', '>', '<'
 ]
 literals = [
-    'true', 'false', 'NULL', 'undefined', 'NaN', 'Infinity', '""', "''", "``"
+    'true', 'false', '""', "''", "``", 'null', 'undefined', 'NaN', 'Infinity'
 ]
 delimiters = [
     '(', ')', '{', '}', '[', ']', '"', "'", "`", ',', ';', ':', '.', '?', '=>'
 ]
 keyWords = [
-    'if', 'else', 'else if', 'switch', 'case', 'default', 'while', 'do', 'for',
-    'break', 'continue', 'return', 'function', 'var', 'let', 'const', 'new',
+    'if', 'else', 'let', 'const', 'var', 'console', 'log', 'alert'
+]
+otherKeyWords = [
+    'switch', 'case', 'default', 'while', 'do', 'for',
+    'break', 'continue', 'return', 'function', 'new',
     'delete', 'in', 'instanceof', 'typeof', 'void', 'this', 'super', 'class',
     'extends', 'import', 'export', 'async', 'await', 'try', 'catch', 'finally',
-    'throw', 'with', 'debugger', 'arguments', 'yield', "console", "log", "alert"
+    'throw', 'with', 'debugger', 'arguments', 'yield'
 ]
 
 # Expresiones regulares para los diferentes tipos de tokens
@@ -25,85 +28,119 @@ identifierRegex = r"\b[a-zA-Z_$][a-zA-Z0-9_$]*\b"
 numberRegex = r"\b\d+(\.\d+)?\b"
 stringRegex = r'"[^"]*"|\'[^\']*\'|`[^`]*`'
 operatorRegex = r"|".join(re.escape(op) for op in operators)
+literalRegex = r"\b" + r"\b|\b".join(literals) + r"\b"
 delimiterRegex = r"|".join(re.escape(delim) for delim in delimiters)
 keywordRegex = r"\b" + r"\b|\b".join(keyWords) + r"\b"
+
+
 commentRegex = r"//.*|/\*[\s\S]*?\*/"
 
 # Regex para capturar todos los tokens válidos
 validTokensRegex = (
-    f"({commentRegex})|({stringRegex})|({numberRegex})|({identifierRegex})|"
+    f"({literalRegex})|({commentRegex})|({stringRegex})|({numberRegex})|({identifierRegex})|"
     f"({operatorRegex})|({delimiterRegex})|({keywordRegex})"
 )
+
+# Función para clasificar tokens
+def clasificar_token(token, esValido):
+    tipo = "NAN" if not esValido else determinar_tipo(token)
+    return {"valor": token, "tipo": tipo, "esValido": esValido}
+
+tipos_tokens = {
+    "cadena": stringRegex,
+    "keyWord": keywordRegex,
+    "operador": operatorRegex,
+    "delimitador": delimiterRegex,
+    "numero": numberRegex,
+    "identificador": identifierRegex,
+    "literal": literalRegex,
+}
+
+def determinar_tipo(token):
+    for tipo, regex in tipos_tokens.items():
+        if re.match(regex, token):
+            return tipo
+    return "NAN"
 
 # Función para analizar léxicamente el código
 def analizarLexico(code):
     # Elimina los espacios en blanco al inicio y al final del código
     code = code.strip()
-    # Encuentra todos los tokens válidos
-    validTokens = re.findall(validTokensRegex, code, re.MULTILINE | re.DOTALL)
-    # Filtra los grupos vacíos
-    validTokens = [t for ts in validTokens for t in ts if t]
+    lineas = code.split('\n')
+    codigoPorLineas = []
 
-    # Inicializa una lista para guardar los tokens no válidos
-    invalidTokens = []
+    for linea in lineas:
+        tokensObjetos = []
+        index = 0
+        while index < len(linea):
+            if linea[index].isspace():
+                index += 1
+                continue
 
-    # Índice para seguir la posición en el código
-    index = 0
+            # Encuentra el próximo token válido o el final de la línea
+            match = re.search(validTokensRegex, linea[index:], re.MULTILINE | re.DOTALL)
+            if match:
+                start, end = match.span()
+                # Si hay texto antes del token válido, es un token no válido
+                if start > 0:
+                    token_no_valido = linea[index:index+start]
+                    tokensObjetos.append(clasificar_token(token_no_valido, False))
+                # Agrega el token válido
+                token_valido = linea[index+start:index+end]
+                tokensObjetos.append(clasificar_token(token_valido, True))
+                index += end
+            else:
+                # Si no hay más tokens válidos, procesa el resto de la línea como token no válido
+                token_no_valido = linea[index:]
+                tokensObjetos.append(clasificar_token(token_no_valido, False))
+                break
 
-    while index < len(code):
-        # Encuentra el próximo token válido o el final del código
-        match = re.search(validTokensRegex, code[index:], re.MULTILINE | re.DOTALL)
-        if match:
-            start, end = match.span()
-            # Agrega el texto antes del token válido a los tokens no válidos
-            if start > 0:
-                invalidTokens.append(code[index:index+start])
-            # Actualiza el índice para continuar después del token válido
-            index += end
-        else:
-            # Si no hay más tokens válidos, agrega el resto del código a los tokens no válidos
-            invalidTokens.append(code[index:])
-            break
+        # Agrega la lista de objetos de tokens a la lista de líneas
+        codigoPorLineas.append(tokensObjetos)
 
-    tokens = []
-    # Imprime los tokens válidos y crea un diccionario con la información
-    for c in validTokens:
-        if c in operators:
-            tokens.append({"tipo": "Operador", "valor": c})
-            print(f'Operador: {c}')
-        elif c in literals:
-            tokens.append({"tipo": "Literal", "valor": c})
-            print(f'Literal: {c}')
-        elif c in delimiters:
-            tokens.append({"tipo": "Delimitador", "valor": c})
-            print(f'Delimitador: {c}')
-        elif c in keyWords:
-            tokens.append({"tipo": "Palabra clave", "valor": c})
-            print(f'Palabra clave: {c}')
-        elif re.fullmatch(commentRegex, c):
-            tokens.append({"tipo": "Comentario", "valor": c})
-            print(f'Comentario: {c}')
-        elif re.fullmatch(numberRegex, c):
-            tokens.append({"tipo": "Número", "valor": c})
-            print(f'Número: {c}')
-        elif re.fullmatch(identifierRegex, c):
-            tokens.append({"tipo": "Identificador", "valor": c})
-            print(f'Identificador: {c}')
-        elif re.fullmatch(stringRegex, c):
-            tokens.append({"tipo": "String", "valor": c})
-            print(f'String: {c}')
+    # Retorna la lista de listas de objetos de tokens
+    return codigoPorLineas
 
-    # Imprime los tokens no válidos
-    for c in invalidTokens:
-        if c.strip():
-            print(f'Token no válido: {c}')
-            
-    # Si es un espacio en blanco, lo sacamos del arreglo de tokens no válidos
-    invalidTokens = [c for c in invalidTokens if c.strip()]
-   
-	# Retorna True si no hay tokens no válidos, False en caso contrario
-    return {"isValid": not bool(invalidTokens), "tokensList": tokens}
+def generarReporteLexico(codigoAnalizado):
+    errores = ""
+    tokens = ""
+    numeroLinea = 1
 
-# Ejemplo de uso
-# codigo_js = "123asd // Esto es un 12comentario"
-# print(analizarLexico(codigo_js))
+    for linea in codigoAnalizado:
+        # Variables para almacenar los errores y tokens de la línea actual
+        erroresLinea = []
+        tokensLinea = []
+
+        for tokenObj in linea:
+            # Construye la lista de tokens con su tipo
+            tokensLinea.append(f"{tokenObj['valor']}: {tokenObj['tipo']}")
+
+            # Si el token no es válido, agrega un mensaje de error
+            if not tokenObj['esValido']:
+                erroresLinea.append(f"LEXIC_ERROR there is a lexic error in line {numeroLinea} due to the token {tokenObj['valor']}")
+
+        # Agrega los errores y tokens de la línea al reporte general
+        if erroresLinea:
+            errores += "\n".join(erroresLinea) + "\n"
+        tokens += "\n".join(tokensLinea) + "\n"
+
+        numeroLinea += 1
+
+    # Construye el reporte final
+    reporteFinal = "----ERRORES----\n" + errores + "\n----TOKENS----\n" + tokens
+    return reporteFinal
+    
+# # Ejemplo de uso
+# codigo_js = """
+# let x = '';
+# if (x > 10) {
+#   console.log('X es mayor o igual a 10');
+# } else if (x < 10){
+#     console.log('X es menor a 10');
+# } else {
+#     console.log('X es igual a 10');
+# }
+# """
+
+# codigoAnalizado = analizarLexico(codigo_js)
+# print(generarReporteLexico(codigoAnalizado))
