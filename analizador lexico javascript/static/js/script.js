@@ -8,13 +8,13 @@ const modalSemantico = document.getElementById('modal-semantico')
 
 const analizarTexto = () => {
     let input = textArea.value
+    let sanitizedInput = input.replace(/\//g, '');
     console.log(input)
-    fetch(`/analizar-lexico/${input}`, { method: 'POST' })
+    fetch(`/analizar-lexico/${sanitizedInput}`, { method: 'POST' })
         .then(response => {
             return response.json()
         })
         .then(data => {
-            alert(`resultado analisis ${JSON.stringify(data.result)}`)
             reporteLexico(data.reporteLexico.errores)
             reporteSintactico(data.reporteSintactico)
             reporteSemantico(data.reporteSemantico)

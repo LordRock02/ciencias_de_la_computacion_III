@@ -42,6 +42,7 @@ def generarReporteSemantico(codigoAnalizado):
         
     # Construye el reporte final
     reporteFinal = "----ERRORES SEMANTICOS----\n" + errores + "\n----ACCIONES----\n" + tokens
+    print(f'reporte semantico ------------ {reporteFinal}')
     return errors
 
 # # Función de prueba
